@@ -4,19 +4,19 @@ import Pulser_TGF4242
 
 """ Script to run a sequence of triangular pulses with the TGF4242 pulser """
 
-if __name__ == "main":
+#TODO: Set this up properly - Also with better log file
 
-    pulser = Pulser_TGF4242.get_connection(ip_adress='192.168.1.1')
+pulser = Pulser_TGF4242.get_connection(ip_adress='169.254.97.29')
 
-    save_dir = 'output'
-    voltages = np.linspace(0, 5, 100) #in mV, step+1
-    acq_time = 5 #in seconds, per voltage
+save_dir = 'output' #For the log file
+voltages = np.linspace(250, 1000, 4) #in mV, Beware: step+1
+acq_time = 5 #in seconds, per voltage
 
-    Pulser_TGF4242.setup_triangular(channel=1)
-    Pulser_TGF4242.run_sequence(voltages=voltages, acq_time=5)
+Pulser_TGF4242.setup_triangular(pulser, channel=1)
+Pulser_TGF4242.run_sequence(pulser, voltages=voltages, acq_time=acq_time)
 
-    with open (f'{save_dir}/pulse_voltages.txt', 'w') as f:
-        f.write('Input pulse voltages in mV:')
-        f.write(voltages)
+with open (f'{save_dir}/pulse_voltages.txt', 'w') as f:
+    f.write('Input pulse voltages in mV:')
+    f.write(str(voltages))
 
-    pulser.close()
+pulser.close()
