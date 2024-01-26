@@ -81,6 +81,22 @@ def setup_sinusoidal(tgf4242, channel):
 
     print('Setup done')
 
+def run_single_volt(tgf4242, voltage):
+    """ Runs a single voltage on the TGF4242 pulser for an indefinite amount of time """
+
+    voltage = voltage/1000 #Convert to V
+
+    tgf4242.write('HILVL {}'.format(voltage))
+    tgf4242.write('SQRSYMM 10')
+    tgf4242.write('OUTPUT ON') #Turn on output
+    tgf4242.write('BEEP') #Beep when starting a run
+
+def stop_run(tgf4242):
+    """ Stops the current run on the TGF4242 pulser """
+
+    tgf4242.write('OUTPUT OFF') #Turn off output
+    tgf4242.write('BEEP') #Beep when stopping a run
+
 def run_sequence(tgf4242, voltages, acq_time):
     voltages = np.divide(voltages, 1000) #Convert to V
     
