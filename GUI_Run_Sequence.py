@@ -178,9 +178,8 @@ class PulserGUI:
                     waveform_function = Pulser_TGF4242.setup_square(pulser, channel) # <--------------------------------- Setup function gets called here
 
             acq_time = float(self.acq_time_entry.get()) if self.acq_time_entry.get() else 5 #Default=5s
-            print('acq_time: ', acq_time)
+            print('\nacq_time: ', acq_time)
 
-            print('Run sequence')
             Pulser_TGF4242.run_sequence(pulser, voltages=voltages, acq_time=acq_time) # <--------------------------------- Run sequence function gets called here
 
             pulser.close() # <--------------------------------- Connection gets closed here

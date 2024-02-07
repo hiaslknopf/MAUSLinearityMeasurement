@@ -72,7 +72,7 @@ def setup(status, chandle, channel='A', coupling='AC', voltage_range='1V', trigg
 
     # Set up trigger
     if trigger is not None:
-        setTreshold = mV2adc(float(trigger['threshold']))
+        setTreshold = mV2adc(trigger, setRange, ctypes.c_int16(32767))
         
         if trigger < 0:
             setDirection = setup_dict['trigger_dir']['Falling']
@@ -118,7 +118,7 @@ def run_block_acq(status, chandle, channel, info_dict):
     maxSamples = info_dict['MaxSamples']
     timeIntervalns = ctypes.c_float(info_dict['TimeInterval'])
 
-    status["runBlock"] = ps.ps4000RunBlock(chandle, preTriggerSamples, postTriggerSamples, timebase, oversample, None, 0, None, None)
+    status["runBlock"] = ps.ps4000RunBlock(chandle, preTriggerSamples, postTriggerSamples, int(timebase), oversample, None, 0, None, None)
     assert_pico_ok(status["runBlock"])
 
     # Check for data collection to finish using ps4000IsReady
