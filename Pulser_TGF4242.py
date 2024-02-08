@@ -5,8 +5,9 @@ import sys
 
 """ Script to control the TGF4242 pulser for a linearization measurement.
 
-    Connection with Ethernet cable -> Automatic IP assignment
-    To find the instrument IP adress: UTILITY -> Help -> option3 -> Scroll down to "IP address"
+    Communication via VISA interface - No drivers needed
+    Connection via point to point Ethernet -> Automatic IP assignment (DHCP)
+    To get the instrument IP adress: UTILITY -> Help -> option3 -> Scroll down to "IP address"
 """
 
 ip_adress = '169.254.97.29'

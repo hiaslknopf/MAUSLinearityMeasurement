@@ -5,6 +5,9 @@ import ctypes
 
 """ Collection of functions to control the PicoScope 4227 Oscilloscope
 
+In order to use this, you have to install the picoSDK dirver for the PicoScope 4227 and the python wrapper for the picoSDK.
+Follow the instructions given here: https://github.com/picotech/picosdk-python-wrappers/blob/master
+
 Run get_connection() to get a connection to the PicoScope. This returns a status dictionary and a chandle.
 Run setup() to set up the PicoScope (Channel, trigger, timebase). This returns a dictionary with the setup information.
 Run run_block_acq() to run one block acquisition and return the voltage and time data of one trigger event as numpy arrays.
