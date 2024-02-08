@@ -2,6 +2,9 @@
 __pycache__/
 *.py[cod]
 
+# Instructions (Not yet written)
+*.docx
+
 output/*
 
 !output/.gitkeep
