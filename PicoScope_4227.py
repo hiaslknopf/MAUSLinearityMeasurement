@@ -37,7 +37,7 @@ def get_connection():
 
     return status, chandle
 
-def setup(status, chandle, channel='A', coupling='AC', voltage_range='1V', trigger=None, timebase='4ns', preTriggerSamples=500, postTriggerSamples=2500):
+def setup(status, chandle, channel='A', coupling='AC', voltage_range='1V', trigger=None, timebase='8ns', preTriggerSamples=1000, postTriggerSamples=5000):
 
     """ Set up one channel and trigger on the PicoScope
 
