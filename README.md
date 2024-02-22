@@ -17,13 +17,23 @@ These can be used as:
 
 * `Analyse_Pulser_Calibration.py`: Helper script for analysing pulser calibration data
 
-TODO:
-* Pulser calibration GUI
-* Better triggering and more thorough analysis for pulser calibration
-* The current .JOB file is just a placeholder for testing (Not sure if ever needed)
+REQUIREMENTS:
+The whole collection is Python based (3.9), Apart from standard packages you need to install:
+* PicoSDK + Python Wrapper: https://github.com/picotech/picosdk-python-wrappers
+* PyVISA: https://pypi.org/project/PyVISA
 
-Ressources:
+SETUP:
+* The Pulser is connected via a direct Ethernet connection - The IP Adress is dynamically assigned and has to be changed in the source code (Usually it stays the same for the same PC)
+* The PicoScope is connected via the standard USB connection - There can only be one data stream, so the PicoScope Software has to be closed when using PicoSDK !!!
+
+RESSOURCES:
+If you are confused, maybe have a look at one of the following
 * TGF4000 Series Instruction Manual: Chapter 24+25
 * PicoScope4000 Series Programmer's Guide
 * GitHub: picosdk Python wrapper + examples (https://github.com/picotech/picosdk-python-wrappers)
 * ORTEC MEASTRO User Manual: Chapter 6
+
+  TODO:
+* Pulser calibration GUI
+* Better triggering and more stable analysis for pulser calibration
+* The current .JOB file is just a placeholder for testing (Not sure if this functionality is ever needed)
