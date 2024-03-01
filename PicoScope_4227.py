@@ -154,7 +154,7 @@ def run_block_acq(status, chandle, channel, info_dict):
     maxADC = ctypes.c_int16(32767)
 
     # convert ADC counts data to mV
-    voltage_data =  adc2mV(bufferMax, setRange, maxADC)
+    voltage_data =  np.array(adc2mV(bufferMax, setRange, maxADC))
     time_data = np.linspace(0, (cmaxSamples.value - 1) * timeIntervalns.value, cmaxSamples.value)
 
     return voltage_data, time_data
