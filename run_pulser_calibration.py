@@ -30,6 +30,7 @@ analyse_directly = True #Analyse data directly after acquisition
 output_name = 'output/Pulser_calib_070224' #Name of output files (pickle, csv)
 testplot_analysis = True #Plot analysis of one voltage
 testplot_results = True #Plot results
+fit = False #Fit the data with a sigmoid
 
 ################################################
 ################################################
@@ -98,5 +99,5 @@ Scope.close_scope(status, chandle)
 
 # Analyse data
 if analyse_directly:
-    Analyse.analyse_pulses(data_dict, output_name, testplot_analysis, testplot_results)
+    Analyse.analyse_pulses(data_dict, output_name, testplot_analysis, testplot_results, fit)
     print('Analysis finished')

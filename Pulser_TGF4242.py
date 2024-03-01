@@ -10,7 +10,7 @@ import sys
     To get the instrument IP adress: UTILITY -> Help -> option3 -> Scroll down to "IP address"
 """
 
-ip_adress = '169.254.97.29'
+DEFAULT_IP = '169.254.97.29'
 
 def get_connection(ip_adress):
     """ Establishes a connection to the TGF4242 pulser and returns the pyvisa object"""
@@ -29,8 +29,8 @@ def get_connection(ip_adress):
 
     return tgf4242
 
-def setup_triangular(tgf4242, channel):
-    """ Sets up the TGF4242 pulser to output a triangular waveform (for PreAmp Input testing)"""
+def setup_triangular(tgf4242, channel, symm='left'):
+    """ Sets up the TGF4242 pulser to output a triangular waveform (for PreAmp Input testing) """
 
     tgf4242.write('*RST') #Reset to default settings
     tgf4242.write('CHN {}'.format(channel)) #Output channel
@@ -43,7 +43,11 @@ def setup_triangular(tgf4242, channel):
     tgf4242.write('DCOFFS 0') #DC offset 0V
 
     tgf4242.write('ZLOAD 50') #Load impedance 50Ohm --> 50Ohm termination on osci !!!
-    tgf4242.write('RMPSYMM 0') #Triangular waveform
+
+    if symm == 'left':
+        tgf4242.write('RMPSYMM 0') #Triangular waveform
+    elif symm == 'right':
+        tgf4242.write('RMPSYMM 100')
 
     print('Setup done')
 
@@ -132,5 +136,5 @@ if __name__ == '__main__':
     #rm.list_resources("?*::SOCKET")
     #sys.exit()
 
-    tgf4242 = get_connection(ip_adress)
+    tgf4242 = get_connection(DEFAULT_IP)
     tgf4242.close()

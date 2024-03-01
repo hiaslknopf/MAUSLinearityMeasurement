@@ -56,6 +56,9 @@ class PulserGUI:
         self.voltage_range_button = tk.Button(self.group2_frame, text="Enable Range", command=self.enable_voltage_range)
         self.voltage_range_button.grid(row=0, column=6, padx=10, pady=5)
 
+        self.show_sequence_label = tk.Button(self.group2_frame, text="Show Sequence", command=self.show_sequence)
+        self.show_sequence_label.grid(row=0, column=7, padx=10, pady=5)
+
         self.voltage_sequence_label = tk.Label(self.group2_frame, text="Voltage Sequence\n(Comma separated)")
         self.voltage_sequence_label.grid(row=1, column=0, padx=10, pady=5, sticky=tk.E)
 
@@ -86,20 +89,25 @@ class PulserGUI:
         self.waveform_var = tk.StringVar()
         self.waveform_var.set("Triangular")
 
-        self.triangular_button = tk.Radiobutton(self.group3_frame, text="Triangular", variable=self.waveform_var, value="Triangular")
+        self.triangular_button = tk.Radiobutton(self.group3_frame, text="Triangular", variable=self.waveform_var, value="Triangular", command=self.turn_on_symmetry)
         self.triangular_button.grid(row=1, column=1, padx=10, pady=5, sticky=tk.W)
 
-        self.sine_button = tk.Radiobutton(self.group3_frame, text="Sine", variable=self.waveform_var, value="Sine")
+        self.symm_var = tk.IntVar()
+        self.symm_var.set(1)
+        self.symm_checkbox = tk.Checkbutton(self.group3_frame, text="Symmetry: Left _|\_", variable=self.symm_var, onvalue=1, offvalue=0)
+        self.symm_checkbox.grid(row=2, column=1, padx=10, pady=5, sticky=tk.E)
+
+        self.sine_button = tk.Radiobutton(self.group3_frame, text="Sine", variable=self.waveform_var, value="Sine", command=self.turn_off_symmetry)
         self.sine_button.grid(row=1, column=2, padx=10, pady=5, sticky=tk.W)
 
-        self.square_button = tk.Radiobutton(self.group3_frame, text="Square", variable=self.waveform_var, value="Square")
+        self.square_button = tk.Radiobutton(self.group3_frame, text="Square", variable=self.waveform_var, value="Square", command=self.turn_off_symmetry)
         self.square_button.grid(row=1, column=3, padx=10, pady=5, sticky=tk.W)
 
         self.acq_time_label = tk.Label(self.group3_frame, text="Acquisition Time per voltage [s]")
-        self.acq_time_label.grid(row=2, column=0, padx=10, pady=5, sticky=tk.E)
+        self.acq_time_label.grid(row=3, column=0, padx=10, pady=5, sticky=tk.E)
 
         self.acq_time_entry = tk.Entry(self.group3_frame, width=5)
-        self.acq_time_entry.grid(row=2, column=1, columnspan=3, padx=10, pady=5, sticky=tk.W)
+        self.acq_time_entry.grid(row=3, column=1, columnspan=3, padx=10, pady=5, sticky=tk.W)
 
         # Group 4: Run Button
         self.group4_frame = tk.Frame(self.main_frame)
@@ -107,6 +115,9 @@ class PulserGUI:
 
         self.run_button = tk.Button(self.group4_frame, text="Run Pulser", command=self.run_pulser, width=20, height=2)
         self.run_button.grid(row=0, column=0, pady=10, padx=10)
+
+        self.reset_button = tk.Button(self.group4_frame, text="Reset", command=self.reset_GUI, width=20, height=2)
+        self.reset_button.grid(row=0, column=1, pady=10, padx=10)
 
     def test_connection(self):
         ip_address = self.ip_entry.get()
@@ -117,6 +128,14 @@ class PulserGUI:
             messagebox.showinfo("Connection Test", "Connection successful!")
         except Exception as e:
             messagebox.showerror("Connection Test", f"Error: {str(e)}")
+
+    def turn_off_symmetry(self):
+        self.symm_var.set(0)
+        self.symm_checkbox.config(state="disabled")
+    
+    def turn_on_symmetry(self):
+        self.symm_var.set(1)
+        self.symm_checkbox.config(state="normal")
 
     def enable_voltage_range(self):
         self.voltage_from_entry.config(state="normal")
@@ -130,16 +149,44 @@ class PulserGUI:
         self.voltage_steps_entry.config(state="disabled")
         self.voltage_sequence_entry.config(state="normal")
 
+    def show_sequence(self):
+        if self.voltage_from_entry.get() and self.voltage_to_entry.get() and self.voltage_steps_entry.get():
+            voltages = np.linspace(float(self.voltage_from_entry.get()), float(self.voltage_to_entry.get()), int(self.voltage_steps_entry.get())+1)
+            messagebox.showwarning("Show Sequence", f"Selected voltages [mV]:\n{voltages}")
+        elif self.voltage_sequence_entry.get():
+            voltages = np.array(list(map(int, self.voltage_sequence_entry.get().split(','))))
+            messagebox.showwarning("Show Sequence", f"Selected voltages [mV]:\n{voltages}")
+        else:
+            messagebox.showwarning("Show Sequence", "Please enter voltage range or sequence first.")
+
+    def reset_GUI(self):
+
+        print(f'Resetting GUI\n')
+
+        self.voltage_from_entry.delete(0, tk.END)
+        self.voltage_to_entry.delete(0, tk.END)
+        self.voltage_steps_entry.delete(0, tk.END)
+        self.voltage_sequence_entry.delete(0, tk.END)
+        self.channel_var1.set(0)
+        self.channel_var2.set(0)
+        self.waveform_var.set("Triangular")
+        self.acq_time_entry.delete(0, tk.END)
+
     def run_pulser(self):
-        ip_address = self.ip_entry.get()
-        print('ip_address: ', ip_address)
+        if not self.ip_entry.get():
+            messagebox.showwarning("Run Pulser", f"IP address assumed {Pulser_TGF4242.DEFAULT_IP}")
+            ip_address = Pulser_TGF4242.DEFAULT_IP
+        else:
+            ip_address = self.ip_entry.get()
+        
+        print('ip_address: ', ip_address, '\n')
 
         try:
             if self.voltage_from_entry.get() and self.voltage_to_entry.get():
                 voltages = np.linspace(float(self.voltage_from_entry.get()), float(self.voltage_to_entry.get()), int(self.voltage_steps_entry.get())+1)
-                if voltages[-1] > 1000:
+                if voltages[-1] > 5000:
                     messagebox.showwarning("Run Pulser", "Maximum voltage is 1000mV.")
-                    raise ValueError("Maximum voltage is 1000mV.")
+                    raise ValueError("Maximum voltage is 5V.")
                     
                 if voltages[0] < 1:
                     messagebox.showwarning("Run Pulser", "Minimum voltage is 1mV.")
@@ -159,6 +206,13 @@ class PulserGUI:
             pulser = Pulser_TGF4242.get_connection(ip_adress=ip_address) # <--------------------------------- Connection function gets called here
 
             wfm = self.waveform_var.get().lower()
+            symm_var = self.symm_var.get()
+
+            if symm_var == 1:
+                symm = 'left'
+            else:
+                symm = 'right'
+
             channels = []
             if self.channel_var1.get() == 1:
                 channels.append(1)
@@ -169,7 +223,7 @@ class PulserGUI:
                 print('Channel: ', channel)
                 if wfm == "triangular":
                     print('Waveform: ', wfm)
-                    waveform_function = Pulser_TGF4242.setup_triangular(pulser, channel) # <--------------------------------- Setup function gets called here
+                    waveform_function = Pulser_TGF4242.setup_triangular(pulser, channel, symm) # <--------------------------------- Setup function gets called here
                 elif wfm == "sine":
                     print('Waveform: ', wfm)
                     waveform_function = Pulser_TGF4242.setup_sine(pulser, channel) # <--------------------------------- Setup function gets called here
@@ -177,7 +231,7 @@ class PulserGUI:
                     print('Waveform: ', wfm)
                     waveform_function = Pulser_TGF4242.setup_square(pulser, channel) # <--------------------------------- Setup function gets called here
 
-            acq_time = float(self.acq_time_entry.get()) if self.acq_time_entry.get() else 5 #Default=5s
+            acq_time = float(self.acq_time_entry.get()) if self.acq_time_entry.get() else 10 #Default=10s
             print('\nacq_time: ', acq_time)
 
             Pulser_TGF4242.run_sequence(pulser, voltages=voltages, acq_time=acq_time) # <--------------------------------- Run sequence function gets called here
@@ -194,5 +248,3 @@ if __name__ == "__main__":
     root = tk.Tk()
     app = PulserGUI(root)
     root.mainloop()
-
-
