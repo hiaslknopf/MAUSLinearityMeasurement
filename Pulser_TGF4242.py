@@ -1,7 +1,7 @@
 import pyvisa
 import numpy as np
 import time
-import sys
+from tqdm import tqdm
 
 """ Script to control the TGF4242 pulser for a linearization measurement.
 
@@ -50,6 +50,7 @@ def setup_triangular(tgf4242, channel, symm='left'):
         tgf4242.write('RMPSYMM 100')
 
     print('Setup done')
+    time.sleep(5)
 
 def setup_square(tgf4242, channel):
     """ Sets up the TGF4242 pulser to output a square waveform """
@@ -70,6 +71,7 @@ def setup_square(tgf4242, channel):
     tgf4242.write('SQRSYMM 50') #Square waveform
 
     print('Setup done')
+    time.sleep(5)
 
 def setup_sine(tgf4242, channel):
     """ Sets up the TGF4242 pulser to output a sinusoidal waveform """
@@ -88,6 +90,7 @@ def setup_sine(tgf4242, channel):
     tgf4242.write('SQRSYMM 0') #Triangular waveform
 
     print('Setup done')
+    time.sleep(5)
 
 def run_single_volt(tgf4242, voltage):
     """ Runs a single voltage on the TGF4242 pulser for an indefinite amount of time """
@@ -119,8 +122,12 @@ def run_sequence(tgf4242, voltages, acq_time):
         tgf4242.write('OUTPUT ON') #Turn on output
         tgf4242.write('BEEP') #Beep when changing voltage
 
+        time.sleep(0.5) #Wait for the pulser to settle
+
         begin = time.time()
-        time.sleep(acq_time) #In seconds
+        #time.sleep(acq_time) #In seconds
+        for _ in tqdm(range(int(acq_time)),desc=f"Running pulser at {volt} mV..."):
+            time.sleep(1)
 
         tgf4242.write('OUTPUT OFF') #Turn off output
 

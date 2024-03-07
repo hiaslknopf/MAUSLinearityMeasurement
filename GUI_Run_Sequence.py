@@ -119,6 +119,9 @@ class PulserGUI:
         self.reset_button = tk.Button(self.group4_frame, text="Reset", command=self.reset_GUI, width=20, height=2)
         self.reset_button.grid(row=0, column=1, pady=10, padx=10)
 
+        #self.stop_button = tk.Button(self.group4_frame, text="Stop Pulser", command=self.stop_pulser, width=20, height=2)
+        #self.stop_button.grid(row=0, column=2, pady=10, padx=10)
+
     def test_connection(self):
         ip_address = self.ip_entry.get()
         print('ip_address: ', ip_address)
@@ -204,6 +207,8 @@ class PulserGUI:
                 raise ValueError("Please enter voltage range or sequence.")
 
             pulser = Pulser_TGF4242.get_connection(ip_adress=ip_address) # <--------------------------------- Connection function gets called here
+
+            Pulser_TGF4242.stop_run(pulser) #Safety measure
 
             wfm = self.waveform_var.get().lower()
             symm_var = self.symm_var.get()

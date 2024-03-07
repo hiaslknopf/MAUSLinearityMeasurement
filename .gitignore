@@ -8,3 +8,5 @@ __pycache__/
 output/*
 
 !output/.gitkeep
+
+testdata_pico/
