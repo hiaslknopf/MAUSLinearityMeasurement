@@ -5,7 +5,7 @@ from tqdm import tqdm
 from scipy.optimize import curve_fit
 
 #TODO: Fit function maybe and discard badly triggered events
-#TODO: Dont just take uncertainty on max but actual waveform fluctuations
+#TODO: Dont just take uncertainty on max but actual waveform fluctuations - Maybe filtern?
 
 def fit_func(x, A, B, C, D, E):
       return A * np.exp(-D*x) / (1+np.exp(B * (x-C))) - E
@@ -20,10 +20,11 @@ def analyse_pulses(data_dict, output_name, testplot_analysis=False, testplot_res
 
     for volt in tqdm(data_dict.keys(), desc='Analyzing data'):
 
-        max_array = [] #Temporary storage for max and min values per voltage
-        min_array = []
-        pp_array = []
-        fit_pp_array = []
+        #Temporary storage for max and min values per voltage
+        max_array =     []
+        min_array =     []
+        pp_array =      []
+        fit_pp_array =  []
 
         analysis_volt = data_dict[volt]['voltage_data']
         analysis_time = np.multiply(data_dict[volt]['time_data'], timebase/1000)
@@ -80,6 +81,7 @@ def analyse_pulses(data_dict, output_name, testplot_analysis=False, testplot_res
             plt.grid()
             plt.show()
         
+        # Get mean and std of values
         data_dict[volt]['avg_max'] = np.mean(max_array)
         data_dict[volt]['avg_min'] = np.mean(min_array)
         data_dict[volt]['avg_pp'] = np.mean(pp_array)
@@ -90,9 +92,8 @@ def analyse_pulses(data_dict, output_name, testplot_analysis=False, testplot_res
         data_dict[volt]['avg_fit_pp_sigma'] = np.std(fit_pp_array)
 
     # Write results to pulser calibration file (csv)
-    #TODO: Match format with uDos suite
     with open(f'{output_name}.csv', 'w') as f:
-        f.write('Voltage [mV],Measured voltage [mV],Error [mV]\n')
+        f.write('Pulser [mV],Scope [mV],Sigma [mV]\n')
         for volt in voltages:
             f.write(f'{volt},{data_dict[volt]["avg_max"]},{data_dict[volt]["avg_max_sigma"]}\n')
             f.write(f'{volt},{data_dict[volt]["avg_min"]},{data_dict[volt]["avg_min_sigma"]}\n')
@@ -101,7 +102,6 @@ def analyse_pulses(data_dict, output_name, testplot_analysis=False, testplot_res
         print(f'Results saved to file {f.name}')
         
     # Optional results plot
-    #TODO: Match format with uDos suite
     if testplot_results:
         plt.errorbar(voltages, [data_dict[volt]['avg_pp'] for volt in voltages], yerr=[data_dict[volt]['avg_pp_sigma'] for volt in voltages], linestyle='--', marker='o', label='Vpp')
         if fit:

@@ -2,6 +2,9 @@ import numpy as np
 import Pulser_TGF4242
 import tkinter as tk
 from tkinter import messagebox
+import time
+
+from tkinter import filedialog
 
 """ Simple GUI to run a sequence of voltage pulses with the TGF4242 pulser 
 
@@ -94,7 +97,7 @@ class PulserGUI:
 
         self.symm_var = tk.IntVar()
         self.symm_var.set(1)
-        self.symm_checkbox = tk.Checkbutton(self.group3_frame, text="Symmetry: Left _|\_", variable=self.symm_var, onvalue=1, offvalue=0)
+        self.symm_checkbox = tk.Checkbutton(self.group3_frame, text="Symmetry: Left _|\_ (0%)", variable=self.symm_var, onvalue=1, offvalue=0)
         self.symm_checkbox.grid(row=2, column=1, padx=10, pady=5, sticky=tk.E)
 
         self.sine_button = tk.Radiobutton(self.group3_frame, text="Sine", variable=self.waveform_var, value="Sine", command=self.turn_off_symmetry)
@@ -108,6 +111,19 @@ class PulserGUI:
 
         self.acq_time_entry = tk.Entry(self.group3_frame, width=5)
         self.acq_time_entry.grid(row=3, column=1, columnspan=3, padx=10, pady=5, sticky=tk.W)
+
+        # Browse for output file
+        self.output_label = tk.Label(self.group3_frame, text="Save Info in File")
+        self.output_label.grid(row=4, column=0, padx=10, pady=5, sticky=tk.E)
+
+        self.output_entry = tk.Entry(self.group3_frame, width=20, state='disabled')
+        self.output_entry.grid(row=4, column=1, columnspan=3, padx=10, pady=5, sticky=tk.W)
+
+        self.browse_button = tk.Button(self.group3_frame, text="Browse", state='disabled', command=self.browse_output)
+        self.browse_button.grid(row=4, column=2, padx=10, pady=5)
+
+        self.enable_button = tk.Button(self.group3_frame, text="Enable", command=self.enable_output)
+        self.enable_button.grid(row=4, column=3, padx=10, pady=5)
 
         # Group 4: Run Button
         self.group4_frame = tk.Frame(self.main_frame)
@@ -162,6 +178,21 @@ class PulserGUI:
         else:
             messagebox.showwarning("Show Sequence", "Please enter voltage range or sequence first.")
 
+    def browse_output(self):
+        output_file = tk.filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+        self.output_entry.delete(0, tk.END)
+        self.output_entry.insert(0, output_file)
+    
+    def enable_output(self):
+        enabled_state = self.output_entry.cget("state")
+
+        if enabled_state:
+            self.output_entry.config(state="normal")
+            self.browse_button.config(state="normal")
+        else:
+            self.output_entry.config(state="disabled")
+            self.browse_button.config(state="disabled")
+
     def reset_GUI(self):
 
         print(f'Resetting GUI\n')
@@ -175,7 +206,38 @@ class PulserGUI:
         self.waveform_var.set("Triangular")
         self.acq_time_entry.delete(0, tk.END)
 
+        self.output_entry.delete(0, tk.END)
+        self.output_entry.config(state="disabled")
+        self.browse_button.config(state="disabled")
+
+    def write_output(self, voltages, acq_time, output_file):
+        """ Write info to txt output file """
+
+        with open(output_file, 'w') as f:
+            f.write(f'Pulser sequence info\n')
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S") + '\n\n')
+            f.write(f'Voltage sequence [mV]:\n{voltages}\n')
+            f.write(f'Acquisition time per voltage [s]: {acq_time}\n\n')
+
+            f.write(f'Waveform: {self.waveform_var.get()}\n')
+            if self.symm_var.get() == 1:
+                f.write(f'Symmetry: Left _|\_ (0%)\n')
+            else:
+                f.write(f'Symmetry: Right _/|_ (100%)\n')
+
+    def write_test_output(self, output_file):
+        """ Write info to txt output file """
+
+        with open(output_file, 'w') as f:
+            f.write(f'Pulser test info\n')
+            f.write(time.strftime("%Y-%m-%d %H:%M:%S") + '\n\n')
+            f.write(f'Test successful!\n\n')
+
     def run_pulser(self):
+
+        #if self.output_entry.get():
+        #        self.write_test_output(self.output_entry.get())
+
         if not self.ip_entry.get():
             messagebox.showwarning("Run Pulser", f"IP address assumed {Pulser_TGF4242.DEFAULT_IP}")
             ip_address = Pulser_TGF4242.DEFAULT_IP
@@ -228,13 +290,13 @@ class PulserGUI:
                 print('Channel: ', channel)
                 if wfm == "triangular":
                     print('Waveform: ', wfm)
-                    waveform_function = Pulser_TGF4242.setup_triangular(pulser, channel, symm) # <--------------------------------- Setup function gets called here
+                    Pulser_TGF4242.setup_triangular(pulser, channel, symm) # <--------------------------------- Setup function gets called here
                 elif wfm == "sine":
                     print('Waveform: ', wfm)
-                    waveform_function = Pulser_TGF4242.setup_sine(pulser, channel) # <--------------------------------- Setup function gets called here
+                    Pulser_TGF4242.setup_sine(pulser, channel) # <--------------------------------- Setup function gets called here
                 elif wfm == "square":
                     print('Waveform: ', wfm)
-                    waveform_function = Pulser_TGF4242.setup_square(pulser, channel) # <--------------------------------- Setup function gets called here
+                    Pulser_TGF4242.setup_square(pulser, channel) # <--------------------------------- Setup function gets called here
 
             acq_time = float(self.acq_time_entry.get()) if self.acq_time_entry.get() else 10 #Default=10s
             print('\nacq_time: ', acq_time)
@@ -242,6 +304,11 @@ class PulserGUI:
             Pulser_TGF4242.run_sequence(pulser, voltages=voltages, acq_time=acq_time) # <--------------------------------- Run sequence function gets called here
 
             pulser.close() # <--------------------------------- Connection gets closed here
+
+            #Output file
+            if self.output_entry.get():
+                self.write_output(voltages, acq_time, self.output_entry.get(),
+                                  wfm, symm, channels)
 
             messagebox.showinfo("Run Pulser", "Pulser run successful!")
         except ValueError as ve:

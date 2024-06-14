@@ -2,7 +2,6 @@ import PicoScope_4227 as Scope
 import Pulser_TGF4242 as Pulser
 import Analyse_Pulser_Calibration as Analyse
 
-import time
 import numpy as np
 import pickle
 
@@ -32,9 +31,9 @@ testplot_analysis = True #Plot analysis of one voltage
 testplot_results = True #Plot results
 fit = False #Fit the data with a sigmoid
 
-################################################
-################################################
-################################################
+################################################################################################
+################################################################################################
+################################################################################################
 
 data_dict = {} #Dictionary to store all data
 
@@ -60,15 +59,12 @@ data_dict['timebase'] = info_dict['Timebase']
 
 # Set up Pulser
 Pulser.setup_triangular(pulser, channel=1)
-time.sleep(2) #Wait for pulser to settle
 
 # Run pulser and scope for a given number of acquisitions
 print('VOLTAGES', voltages)
 
 for volt in voltages:
     Pulser.run_single_volt(pulser, volt)
-
-    time.sleep(3) #Wait for pulser to settle	
 
     voltage_data = [] #One list per voltage with num_acq elements each
     time_data = [] #TODO: Maybe time is the same for all voltages? Dann musst nicht so viel speichern
@@ -84,11 +80,9 @@ for volt in voltages:
 
     data_dict[volt] = {'voltage_data': voltage_data, 'time_data': time_data}
 
-    time.sleep(1) #Wait for pulser to settle
-
 # Save raw data
 if save_raw_data:
-    with open(f'{output_name}_raw_data.pickle', 'wb') as f:
+    with open(f'{output_name}_cal_data.pickle', 'wb') as f:
         pickle.dump(data_dict, f)
         print(f'Raw data saved to file {f.name}')
 

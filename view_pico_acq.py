@@ -4,7 +4,7 @@ import pickle
 
 """ Script to view the data collected with run_picoscope_acq.py """
 
-data_file = 'testdata_pico/250mV_1e3.pkl'
+data_file = "C:/Users/knopf/Dropbox/001_DR_HIASL/CODE\Waveform_Analysis_Class/testdata_pico/250mV_1e3.pkl"
 
 # Load the data
 with open(data_file, 'rb') as f:
