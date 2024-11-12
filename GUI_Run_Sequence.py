@@ -6,6 +6,8 @@ import time
 
 from tkinter import filedialog
 
+IP_ADRESS = '169.254.97.29'
+
 """ Simple GUI to run a sequence of voltage pulses with the TGF4242 pulser 
 
     Connection via Ethernet cable -> Automatic IP assignment
@@ -140,6 +142,10 @@ class PulserGUI:
 
     def test_connection(self):
         ip_address = self.ip_entry.get()
+
+        if ip_address == '':
+            ip_address = IP_ADRESS
+
         print('ip_address: ', ip_address)
         try:
             pulser = Pulser_TGF4242.get_connection(ip_adress=ip_address) # <--------------------------------- Connection function gets called here
@@ -307,8 +313,7 @@ class PulserGUI:
 
             #Output file
             if self.output_entry.get():
-                self.write_output(voltages, acq_time, self.output_entry.get(),
-                                  wfm, symm, channels)
+                self.write_output(voltages, acq_time, self.output_entry.get())
 
             messagebox.showinfo("Run Pulser", "Pulser run successful!")
         except ValueError as ve:
