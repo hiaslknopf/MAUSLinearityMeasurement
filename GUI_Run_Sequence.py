@@ -14,9 +14,6 @@ IP_ADRESS = '169.254.97.29'
     To find the instrument IP adress: UTILITY -> Help -> option3 -> Scroll down to "IP address"
 """
 
-# TODO: Option for voltage step instead of just number of steps (easier to use)
-# TODO: Read function for output file (in GUI) doesnt do comma separation
-
 class PulserGUI:
     def __init__(self, master):
         self.master = master
@@ -43,19 +40,19 @@ class PulserGUI:
         self.group2_frame = tk.LabelFrame(self.main_frame, text="Voltage Input [mV]", padx=10, pady=10)
         self.group2_frame.grid(row=1, column=0, padx=10, pady=10, sticky="nsew")
 
-        self.from_label = tk.Label(self.group2_frame, text="From")
+        self.from_label = tk.Label(self.group2_frame, text="From [mV]")
         self.from_label.grid(row=0, column=0, padx=10, pady=5, sticky=tk.E)
 
         self.voltage_from_entry = tk.Entry(self.group2_frame, state="disabled", width=5)  # Adjusted width here
         self.voltage_from_entry.grid(row=0, column=1, padx=10, pady=5, sticky=tk.W)
 
-        self.to_label = tk.Label(self.group2_frame, text="To")
+        self.to_label = tk.Label(self.group2_frame, text="To [mV]")
         self.to_label.grid(row=0, column=2, padx=10, pady=5, sticky=tk.E)
 
         self.voltage_to_entry = tk.Entry(self.group2_frame, state="disabled", width=5)  # Adjusted width here
         self.voltage_to_entry.grid(row=0, column=3, padx=10, pady=5, sticky=tk.W)
 
-        self.steps_label = tk.Label(self.group2_frame, text="Steps")
+        self.steps_label = tk.Label(self.group2_frame, text="Step Size [mV]")
         self.steps_label.grid(row=0, column=4, padx=10, pady=5, sticky=tk.E)
 
         self.voltage_steps_entry = tk.Entry(self.group2_frame, state="disabled", width=5)  # Adjusted width here
@@ -166,12 +163,28 @@ class PulserGUI:
         self.symm_checkbox.config(state="normal")
 
     def enable_voltage_range(self):
+
+        # Clear previous entries in voltage sequence
+        self.voltage_sequence_entry.delete(0, tk.END)
+
+        # Enable show sequence button
+        self.show_sequence_label.config(state="normal")
+
         self.voltage_from_entry.config(state="normal")
         self.voltage_to_entry.config(state="normal")
         self.voltage_steps_entry.config(state="normal")
         self.voltage_sequence_entry.config(state="disabled")
 
     def enable_voltage_sequence(self):
+
+        # Clear previous entries in voltage range
+        self.voltage_from_entry.delete(0, tk.END)
+        self.voltage_to_entry.delete(0, tk.END)
+        self.voltage_steps_entry.delete(0, tk.END)
+    
+        # Disable show sequence button
+        self.show_sequence_label.config(state="disabled")
+
         self.voltage_from_entry.config(state="disabled")
         self.voltage_to_entry.config(state="disabled")
         self.voltage_steps_entry.config(state="disabled")
@@ -179,11 +192,18 @@ class PulserGUI:
 
     def show_sequence(self):
         if self.voltage_from_entry.get() and self.voltage_to_entry.get() and self.voltage_steps_entry.get():
-            voltages = np.linspace(float(self.voltage_from_entry.get()), float(self.voltage_to_entry.get()), int(self.voltage_steps_entry.get())+1)
+
+            volt_from = int(self.voltage_from_entry.get())
+            volt_to = int(self.voltage_to_entry.get())
+            volt_step = int(self.voltage_steps_entry.get())
+
+            voltages = np.arange(volt_from, volt_to + volt_step, volt_step)
             messagebox.showwarning("Show Sequence", f"Selected voltages [mV]:\n{voltages}")
+
         elif self.voltage_sequence_entry.get():
             voltages = np.array(list(map(int, self.voltage_sequence_entry.get().split(','))))
             messagebox.showwarning("Show Sequence", f"Selected voltages [mV]:\n{voltages}")
+
         else:
             messagebox.showwarning("Show Sequence", "Please enter voltage range or sequence first.")
 
@@ -257,7 +277,13 @@ class PulserGUI:
 
         try:
             if self.voltage_from_entry.get() and self.voltage_to_entry.get():
-                voltages = np.linspace(float(self.voltage_from_entry.get()), float(self.voltage_to_entry.get()), int(self.voltage_steps_entry.get())+1)
+
+                volt_from = int(self.voltage_from_entry.get())
+                volt_to = int(self.voltage_to_entry.get())
+                volt_step = int(self.voltage_steps_entry.get())
+
+                voltages = np.arange(volt_from, volt_to + volt_step, volt_step)
+
                 if voltages[-1] > 5000:
                     messagebox.showwarning("Run Pulser", "Maximum voltage is 1000mV.")
                     raise ValueError("Maximum voltage is 5V.")
@@ -265,15 +291,20 @@ class PulserGUI:
                 if voltages[0] < 10:
                     messagebox.showwarning("Run Pulser", "Minimum voltage is 10mV.")
                     raise ValueError("Minimum voltage is 10mV.")
+                
                 if float(self.voltage_from_entry.get()) > float(self.voltage_to_entry.get()):
                     messagebox.showwarning("Run Pulser", "Voltage range is invalid.")
                     raise ValueError("Voltage range is invalid.")
                 
                 print('voltages: ', voltages)
+
             elif self.voltage_sequence_entry.get():
+
                 voltages = np.array(list(map(int, self.voltage_sequence_entry.get().split(','))))
                 voltages = sorted(voltages)
+
                 print('voltages: ', voltages)
+
             else:
                 raise ValueError("Please enter voltage range or sequence.")
 
