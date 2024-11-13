@@ -14,6 +14,9 @@ IP_ADRESS = '169.254.97.29'
     To find the instrument IP adress: UTILITY -> Help -> option3 -> Scroll down to "IP address"
 """
 
+# TODO: Option for voltage step instead of just number of steps (easier to use)
+# TODO: Read function for output file (in GUI) doesnt do comma separation
+
 class PulserGUI:
     def __init__(self, master):
         self.master = master
@@ -259,9 +262,9 @@ class PulserGUI:
                     messagebox.showwarning("Run Pulser", "Maximum voltage is 1000mV.")
                     raise ValueError("Maximum voltage is 5V.")
                     
-                if voltages[0] < 1:
-                    messagebox.showwarning("Run Pulser", "Minimum voltage is 1mV.")
-                    raise ValueError("Minimum voltage is 1mV.")
+                if voltages[0] < 10:
+                    messagebox.showwarning("Run Pulser", "Minimum voltage is 10mV.")
+                    raise ValueError("Minimum voltage is 10mV.")
                 if float(self.voltage_from_entry.get()) > float(self.voltage_to_entry.get()):
                     messagebox.showwarning("Run Pulser", "Voltage range is invalid.")
                     raise ValueError("Voltage range is invalid.")
@@ -305,7 +308,7 @@ class PulserGUI:
                     Pulser_TGF4242.setup_square(pulser, channel) # <--------------------------------- Setup function gets called here
 
             acq_time = float(self.acq_time_entry.get()) if self.acq_time_entry.get() else 10 #Default=10s
-            print('\nacq_time: ', acq_time)
+            print('\nAcquisition per Voltage: ', acq_time, 's\n')
 
             Pulser_TGF4242.run_sequence(pulser, voltages=voltages, acq_time=acq_time) # <--------------------------------- Run sequence function gets called here
 

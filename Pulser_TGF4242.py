@@ -3,6 +3,8 @@ import numpy as np
 import time
 from tqdm import tqdm
 
+import sys
+
 """ Script to control the TGF4242 pulser for a linearization measurement.
 
     Communication via VISA interface - No drivers needed
@@ -97,6 +99,7 @@ def run_single_volt(tgf4242, voltage):
 
     print(f'\n------ Running voltage {voltage} Vpp -------\n')
 
+    #WARNING: Peak to Peak voltage is double the amplitude you set for some reason !!!
     voltage = voltage/2000 #Convert to V
 
     tgf4242.write('AMPL {}'.format(voltage)) #Set voltage
@@ -112,6 +115,7 @@ def stop_run(tgf4242):
 
 def run_sequence(tgf4242, voltages, acq_time):
 
+    #WARNING: Peak to Peak voltage is double the amplitude you set for some reason !!!
     voltages = np.divide(voltages, 2000) #Convert to V
     
     print(f'\n------ Run sequence -------\n')
@@ -126,7 +130,7 @@ def run_sequence(tgf4242, voltages, acq_time):
 
         begin = time.time()
         #time.sleep(acq_time) #In seconds
-        for _ in tqdm(range(int(acq_time)),desc=f"Running pulser at {volt} mV..."):
+        for _ in tqdm(range(int(acq_time)),desc=f"Running pulser at {volt*2000} mV..."):
             time.sleep(1)
 
         tgf4242.write('OUTPUT OFF') #Turn off output
